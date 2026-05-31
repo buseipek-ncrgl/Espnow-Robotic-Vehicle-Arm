@@ -1,39 +1,43 @@
 # 🤖 ESP-NOW Controlled Robotic Vehicle with Robotic Arm
 
 ![ESP32](https://img.shields.io/badge/ESP32-ESP--NOW-red)
-![Deneyap](https://img.shields.io/badge/Deneyap-1A%20V2%20%26%20Mini%20V2-blue)
+![Deneyap](https://img.shields.io/badge/Deneyap-Kart%201A%20V2%20%26%20Mini%20V2-blue)
 ![Arduino](https://img.shields.io/badge/Arduino-C%2B%2B-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A wireless robotic vehicle and robotic arm platform developed using Deneyap Kart, ESP-NOW communication protocol, L298N motor driver, and a 4-DOF robotic arm.
+A wireless robotic vehicle and robotic arm platform developed using Deneyap Kart, ESP-NOW communication protocol, L298N motor driver, and SG90 servo motors.
 
 ---
 
 # 📖 Project Overview
 
-This project was developed to create a fully wireless robotic vehicle capable of movement and object manipulation using a robotic arm.
+This project is a wireless robotic vehicle equipped with a robotic arm and controlled through ESP-NOW communication.
 
-The system consists of two independent units:
+The system consists of two separate units:
 
-### 🎮 Controller Unit
+## 🎮 Controller Unit
+
 - Deneyap Mini V2
-- Two analog joysticks
-- ESP-NOW wireless transmitter
+- Two analog joystick modules
+- ESP-NOW transmitter
 
-### 🚗 Vehicle Unit
+## 🚗 Vehicle Unit
+
 - Deneyap Kart 1A V2
 - L298N Motor Driver
 - 4 DC geared motors
-- 4 servo motors
-- Buck converter (5V regulator)
-- ESP-NOW wireless receiver
+- 4 SG90 servo motors
+- LM2596 Buck Converter
+- ESP-NOW receiver
 
-The controller transmits commands wirelessly using ESP-NOW, allowing the vehicle and robotic arm to operate without any Wi-Fi router or internet connection.
+The controller sends movement and robotic arm commands wirelessly to the vehicle without requiring any Wi-Fi router or internet connection.
 
 ---
 
 # ✨ Features
 
 ## 🚗 Vehicle Control
+
 - Forward movement
 - Backward movement
 - Left turn
@@ -41,16 +45,18 @@ The controller transmits commands wirelessly using ESP-NOW, allowing the vehicle
 - Real-time wireless control
 
 ## 🦾 Robotic Arm Control
+
 - Base rotation
 - Main arm movement
 - Forearm movement
-- Gripper/Bucket control
+- Gripper / bucket control
 
 ## 📡 Communication
+
 - ESP-NOW protocol
 - No router required
-- Low latency
-- Reliable communication
+- Low latency communication
+- Reliable wireless control
 
 ---
 
@@ -58,14 +64,15 @@ The controller transmits commands wirelessly using ESP-NOW, allowing the vehicle
 
 | Component | Quantity |
 |------------|------------|
-| Deneyap Kart 1A | 1 |
+| Deneyap Kart 1A V2 | 1 |
 | Deneyap Mini V2 | 1 |
 | L298N Motor Driver | 1 |
 | DC Gear Motors | 4 |
-| Servo Motors | 4 |
+| SG90 Servo Motors | 4 |
 | Analog Joystick Modules | 2 |
 | 18650 Batteries | 2 |
-| LM2596 Buck Converter | 1 |
+| 5V Buck Converter | 1 |
+| Power Switch | 1 |
 | Breadboard | 1 |
 | Jumper Wires | Multiple |
 | Robotic Chassis | 1 |
@@ -88,72 +95,77 @@ Controller Unit
           │
           │ ESP-NOW
           ▼
-┌────────────────────┐
-│ Deneyap Kart 1A    │
-│                    │
-│ L298N Driver       │
-│ 4 DC Motors        │
-│                    │
-│ 4 Servo Motors     │
-│ Robotic Arm        │
-└────────────────────┘
+┌───────────────────────┐
+│ Deneyap Kart 1A V2    │
+│                       │
+│ L298N Driver          │
+│ 4 DC Motors           │
+│                       │
+│ 4 SG90 Servos         │
+│ Robotic Arm           │
+└───────────────────────┘
 ```
 
 ---
 
-# 🔋 Why Is a Buck Converter Used?
+# 🔋 Power System
 
-A common mistake in robotics projects is powering multiple servo motors directly from the microcontroller board.
+The vehicle is powered by a 2-cell 18650 battery pack.
 
-Servo motors can draw significant current during movement and under load.
+The battery output is distributed to:
 
-For example:
+- L298N motor driver
+- 5V buck converter
 
-```text
-1 Servo ≈ 500mA – 1000mA
-4 Servos ≈ Up to 4A
-```
+The buck converter provides a stable 5V supply for the SG90 servo motors.
 
-The Deneyap Kart cannot safely supply this amount of current.
+---
 
-Without an external regulator, the following issues may occur:
+# ❓ Why Is a Buck Converter Used?
 
-- Random resets
-- ESP32 brownout errors
-- Communication failures
+Although SG90 servo motors are small, they can draw significant current when moving under load.
+
+Using four servos simultaneously may cause:
+
+- Voltage drops
 - Servo jitter
-- Unstable operation
+- ESP32 brownout resets
+- Communication failures
+- Unstable system behavior
 
-To solve this problem, a dedicated 5V buck converter is used.
+To prevent these problems, the servos are powered from a dedicated LM2596 buck converter instead of the Deneyap board.
 
 ### Advantages
 
 ✅ Stable 5V output
 
-✅ High current capability
-
 ✅ Reliable servo operation
 
-✅ Protects the ESP32 from voltage drops
+✅ Better power distribution
+
+✅ Protection against voltage drops
 
 ---
 
 # ⚡ Power Distribution
 
 ```text
-Battery Pack
-     │
-     ├────────► L298N Motor Driver
-     │
-     └────────► LM2596 Buck Converter
-                      │
-                      ▼
-                 Servo Motors
+18650 Battery Pack
+         │
+         ▼
+     Power Switch
+         │
+         ├────────► L298N Motor Driver
+         │
+         └────────► 5V Buck Converter
+                         │
+                         ▼
+                     SG90 Servos
 ```
 
-### Important
+### Common Ground Connection
 
-All grounds must be connected together:
+The following grounds must be connected together:
 
 ```text
 Battery GND
@@ -163,7 +175,20 @@ Buck Converter GND
 Servo GND
 ```
 
-This common ground connection is essential for proper operation.
+This common ground connection is mandatory for proper operation.
+
+---
+
+# 🔘 Power Switch
+
+A physical power switch is installed between the battery pack and the power distribution system.
+
+Benefits:
+
+- Safe startup and shutdown
+- Prevents accidental battery drain
+- Easier testing and maintenance
+- Improved electrical safety
 
 ---
 
@@ -192,10 +217,10 @@ This common ground connection is essential for proper operation.
 
 # 🚗 Vehicle Connections
 
-## L298N Motor Driver
+## L298N Connections
 
-| L298N | Deneyap Kart |
-|--------|-------------|
+| L298N Pin | Deneyap Kart |
+|------------|------------|
 | ENA | D8 |
 | ENB | D0 |
 | IN1 | D12 |
@@ -206,42 +231,42 @@ This common ground connection is essential for proper operation.
 
 ### Motor Outputs
 
-| Motors | L298N Output |
-|---------|-------------|
+| Motors | Output |
+|---------|---------|
 | Left Side Motors | OUT1 - OUT2 |
 | Right Side Motors | OUT3 - OUT4 |
 
 ---
 
-## Servo Connections
+## SG90 Servo Connections
 
 | Servo | Function | Signal Pin |
 |---------|----------|------------|
 | Servo 1 | Base Rotation | D1 |
 | Servo 2 | Main Arm | D4 |
 | Servo 3 | Forearm | SDA |
-| Servo 4 | Gripper/Bucket | A0 |
+| Servo 4 | Gripper / Bucket | A0 |
 
 ### Servo Wiring
 
-| Servo Wire | Connection |
+| Wire Color | Connection |
 |------------|------------|
 | Orange / Yellow | Signal |
 | Red | +5V |
-| Brown / Black | GND |
+| Brown | GND |
 
-All servo motors are powered directly from the LM2596 regulator.
+All SG90 servos are powered directly from the LM2596 output.
 
 ---
 
 # 🎯 Control Logic
 
-## Driving Mode
+## Vehicle Movement
 
-The first joystick controls vehicle movement.
+Joystick #1 controls vehicle movement.
 
-| Action | Vehicle |
-|---------|----------|
+| Direction | Action |
+|------------|---------|
 | Up | Forward |
 | Down | Backward |
 | Left | Turn Left |
@@ -251,10 +276,10 @@ The first joystick controls vehicle movement.
 
 ## Arm Mode 0
 
-The second joystick controls:
+Joystick #2 controls:
 
-| Action | Function |
-|---------|----------|
+| Direction | Function |
+|------------|----------|
 | Left / Right | Base Rotation |
 | Up / Down | Main Arm |
 
@@ -262,10 +287,10 @@ The second joystick controls:
 
 ## Arm Mode 1
 
-Press the joystick button once to switch modes.
+Press the joystick button once.
 
-| Action | Function |
-|---------|----------|
+| Direction | Function |
+|------------|----------|
 | Left / Right | Forearm |
 | Up | Open Gripper |
 | Down | Close Gripper |
@@ -276,7 +301,7 @@ Press the button again to return to Mode 0.
 
 # 📡 ESP-NOW Setup
 
-## Step 1 – Get Vehicle MAC Address
+## Step 1
 
 Upload:
 
@@ -290,7 +315,7 @@ Open Serial Monitor at:
 115200 baud
 ```
 
-Example output:
+Example:
 
 ```text
 94:3C:C6:DA:F2:A4
@@ -298,7 +323,7 @@ Example output:
 
 ---
 
-## Step 2 – Update Controller Code
+## Step 2
 
 Replace the MAC address inside:
 
@@ -306,11 +331,11 @@ Replace the MAC address inside:
 uint8_t aracMAC[]
 ```
 
-with your own vehicle MAC address.
+with your vehicle MAC address.
 
 ---
 
-## Step 3 – Upload Controller Code
+## Step 3
 
 Upload:
 
@@ -318,11 +343,11 @@ Upload:
 kumanda_espnow.ino
 ```
 
-to the Deneyap Mini V2.
+to the controller board.
 
 ---
 
-## Step 4 – Upload Vehicle Code
+## Step 4
 
 Upload:
 
@@ -330,14 +355,14 @@ Upload:
 arac_espnow.ino
 ```
 
-to the Deneyap Kart 1A.
+to the vehicle board.
 
 ---
 
 # 📂 Project Structure
 
 ```text
-deneyap-espnow-robot-vehicle
+deneyap-espnow-robotic-vehicle-arm
 │
 ├── mac_adresi_bul/
 │   └── mac_adresi_bul.ino
@@ -355,26 +380,27 @@ deneyap-espnow-robot-vehicle
 
 # 🔧 Future Improvements
 
-- Proportional speed control based on joystick position
-- Dedicated button controls for gripper operation
-- Battery voltage monitoring system
-- OLED status display for connection and battery information
-- Adjustable servo speed and angle limits
-- Mobile application for remote control
-- Real-time telemetry feedback from the vehicle
-- Camera module integration for remote monitoring
-- Modular end-effector support (gripper, bucket, claw, etc.)
+- Battery voltage monitoring
+- OLED status display
+- Mobile application support
+- Camera integration
+- Adjustable servo speed control
+- 3D printed robotic arm components
+- Additional interchangeable end-effectors
 
 ---
 
+
+
 # 👨‍💻 Technologies Used
 
-- Deneyap Kart 1A
+- Deneyap Kart 1A V2
 - Deneyap Mini V2
 - ESP32
 - Arduino IDE
 - ESP-NOW
 - L298N
-- LM2596 Buck Converter
+- 5V Buck Converter
+- SG90 Servo Motors
 
 ---
